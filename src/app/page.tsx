@@ -1,5 +1,6 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { COLORS, UI_CONFIG } from "./constants";
 import { useClientManagement, useModal } from "./hooks";
 import { createClientFromForm } from "./utils";
@@ -47,6 +48,16 @@ function ExpandButton({ onClick }: { onClick: () => void }) {
 }
 
 export default function Home() {
+  const router = useRouter();
+
+  // Redirect if not authenticated
+  useEffect(() => {
+    const isAuthenticated = sessionStorage.getItem("isAuthenticated");
+    if (!isAuthenticated) {
+      router.push("/auth/login");
+    }
+  }, [router]);
+
   // State Management
   const [collapsed, setCollapsed] = useState(false);
   const { clients, selectedClient, setSelectedClient, addClient } =
@@ -84,6 +95,33 @@ export default function Home() {
 
   return (
     <div style={containerStyle}>
+      {/* Logout Button */}
+        <button
+          onClick={() => {
+            sessionStorage.removeItem("isAuthenticated");
+            router.push("/auth/login");
+          }}
+          style={{
+            position: "fixed",
+            top: 20,
+            right: 20,
+            padding: "10px 20px",
+            borderRadius: "8px",
+            border: "none",
+            background: "#E53E3E", // red color
+            color: "white",
+            fontWeight: "bold",
+            cursor: "pointer",
+            zIndex: 30,
+            transition: "0.3s",
+          }}
+          onMouseOver={(e) => (e.currentTarget.style.opacity = "0.85")}
+          onMouseOut={(e) => (e.currentTarget.style.opacity = "1")}
+        >
+          Logout
+        </button> 
+
+
       {/* Sidebar */}
       <SidePanel
         collapsed={collapsed}
