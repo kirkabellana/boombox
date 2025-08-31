@@ -1,10 +1,9 @@
 "use client";
-import React, { useState } from "react";
+import React from "react";
 import { COLORS, UI_CONFIG } from "./constants";
 import { useClientManagement, useModal } from "./hooks";
 import { createClientFromForm } from "./utils";
 
-// Import Components
 import { SidePanel } from "./components/sidebar";
 import { AddClientModal } from "./components/modals";
 import ClientDetails from "./components/ClientDetails";
@@ -46,15 +45,12 @@ function ExpandButton({ onClick }: { onClick: () => void }) {
   );
 }
 
-export default function Home() {
-  // State Management
-  const [collapsed, setCollapsed] = useState(false);
+export default function DashboardPage() {
+  const [collapsed, setCollapsed] = React.useState(false);
   const { clients, selectedClient, setSelectedClient, addClient } =
     useClientManagement();
-
   const addClientModal = useModal();
 
-  // Event Handlers
   const handleAddClientSubmit = (formData: any) => {
     const newClient = createClientFromForm(formData);
     addClient(formData);
@@ -63,7 +59,6 @@ export default function Home() {
 
   const toggleSidebar = () => setCollapsed((prev) => !prev);
 
-  // Styles
   const mainContentStyle: React.CSSProperties = {
     flex: 1,
     background: COLORS.bg,
@@ -73,6 +68,7 @@ export default function Home() {
       ? UI_CONFIG.SIDEBAR_WIDTH.COLLAPSED
       : UI_CONFIG.SIDEBAR_WIDTH.EXPANDED,
     transition: `margin-left ${UI_CONFIG.TRANSITION_DURATION}`,
+    position: "relative",
   };
 
   const containerStyle: React.CSSProperties = {
@@ -82,9 +78,14 @@ export default function Home() {
     position: "relative",
   };
 
+  // 🔑 Logout function
+  const handleLogout = () => {
+    document.cookie = "isAuthenticated=; Max-Age=0; path=/";
+    window.location.href = "/auth/login";
+  };
+
   return (
     <div style={containerStyle}>
-      {/* Sidebar */}
       <SidePanel
         collapsed={collapsed}
         onCollapse={toggleSidebar}
@@ -94,11 +95,28 @@ export default function Home() {
         onAddClientClick={addClientModal.open}
       />
 
-      {/* Expand Button (shown when collapsed) */}
       {collapsed && <ExpandButton onClick={() => setCollapsed(false)} />}
 
-      {/* Main Content */}
       <main style={mainContentStyle}>
+        {/* 🔑 Logout Button in top-right */}
+        <button
+          onClick={handleLogout}
+          style={{
+            position: "absolute",
+            top: 20,
+            right: 20,
+            background: "linear-gradient(135deg, #FF416C, #FF4B2B)",
+            color: "#fff",
+            border: "none",
+            borderRadius: "8px",
+            padding: "10px 16px",
+            cursor: "pointer",
+            fontWeight: "bold",
+          }}
+        >
+          Logout
+        </button>
+
         <div style={{ maxWidth: 1200, margin: "0 auto" }}>
           {selectedClient ? (
             <ClientDetails client={selectedClient} />
@@ -108,7 +126,6 @@ export default function Home() {
         </div>
       </main>
 
-      {/* Add Client Modal */}
       <AddClientModal
         isOpen={addClientModal.isOpen}
         onClose={addClientModal.close}
